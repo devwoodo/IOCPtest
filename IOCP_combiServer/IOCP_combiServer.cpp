@@ -53,18 +53,13 @@ int main(int argc, char * argv[])
 		int addrLen = sizeof(clntAdr);
 
 		hClntSock = accept(hServSock, (SOCKADDR *)&clntAdr, &addrLen);
-		handleInfo = new(PER_HANDLE_DATA);
-		handleInfo->hClntSock = hClntSock;
-		memcpy(&(handleInfo->clntAdr), &clntAdr, addrLen);
 
-		CreateIoCompletionPort((HANDLE)hClntSock, hComPort, (DWORD)handleInfo, 0);
+		CreateIoCompletionPort((HANDLE)hClntSock, hComPort, hClntSock, 0);
 
 		ioInfo = new PER_IO_DATA(HEADER_SIZE);
 		memset(&(ioInfo->overlapped), 0, sizeof(OVERLAPPED));
-		//ioInfo->wsaBuf.len = HEADER_SIZE;
-		//ioInfo->wsaBuf.buf = ioInfo->get_buffer();
 		ioInfo->rwMode = READ_HEADER;
-		WSARecv(handleInfo->hClntSock, &(ioInfo->wsaBuf), 1, (LPDWORD)&recvBytes, (LPDWORD)&flags, &(ioInfo->overlapped), NULL);
+		WSARecv(hClntSock, &(ioInfo->wsaBuf), 1, (LPDWORD)&recvBytes, (LPDWORD)&flags, &(ioInfo->overlapped), NULL);
 	}
 	return 0;
 }
@@ -78,11 +73,14 @@ DWORD WINAPI EchoThreadMain(LPVOID pComPort)
 	LPPER_IO_DATA ioInfo;
 	DWORD flags = 0;
 
+	SOCKET cpKey;
+
 	while (1)
 	{
-		GetQueuedCompletionStatus(hComPort, &bytesTrans, (LPDWORD)&handleInfo, (LPOVERLAPPED *)&ioInfo, INFINITE);
+		GetQueuedCompletionStatus(hComPort, &bytesTrans, (LPDWORD)&cpKey, (LPOVERLAPPED *)&ioInfo, INFINITE);
 		cout << "GetQueuedComplitionStatus(mode: "<< ioInfo->rwMode << ") bytesTrans = " << bytesTrans << endl;
-		sock = handleInfo->hClntSock;
+		
+		sock = cpKey;
 				
 		if (ioInfo->rwMode == READ_HEADER)
 		{
@@ -91,7 +89,7 @@ DWORD WINAPI EchoThreadMain(LPVOID pComPort)
 			{
 				std::cout << "|READ_HEADER| closing socket(bytesTrans == 0) socket: " << sock << std::endl;
 				closesocket(sock);
-				free(handleInfo); delete(ioInfo);
+				delete(ioInfo);
 				continue;
 			}
 
@@ -123,7 +121,7 @@ DWORD WINAPI EchoThreadMain(LPVOID pComPort)
 			{
 				std::cout << "|READ_PACKET| closing socket(bytesTrans == 0)" << std::endl;
 				closesocket(sock);
-				free(handleInfo); delete(ioInfo);
+				delete(ioInfo);
 				continue;
 			}
 
@@ -143,7 +141,6 @@ DWORD WINAPI EchoThreadMain(LPVOID pComPort)
 
 				LPPER_IO_DATA echoIoInfo = new PerIoData(msgLen);
 				memset(&(echoIoInfo->overlapped), 0, sizeof(OVERLAPPED));
-				//strncpy_s(echoIoInfo->get_buffer(), echoIoInfo->get_bufferLen(), ioInfo->get_buffer(), ioInfo->get_bufferLen());
 				memcpy_s(echoIoInfo->get_buffer(), echoIoInfo->get_bufferLen(), ioInfo->get_buffer(), ioInfo->get_bufferLen());
 				echoIoInfo->rwMode = WRITE;
 				WSASend(sock, &(echoIoInfo->wsaBuf), 1, NULL, 0, &(echoIoInfo->overlapped), NULL);
