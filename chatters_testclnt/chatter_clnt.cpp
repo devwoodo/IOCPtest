@@ -17,7 +17,7 @@ using std::cout;
 using std::endl;
 
 void sending(SOCKET sock, std::shared_ptr<Packet_Base> shPk);
-std::shared_ptr<Packet_Base> receiving(SOCKET sock);
+void receiving(SOCKET sock);
 
 int main(int argc, char * argv[])
 {
@@ -52,6 +52,8 @@ int main(int argc, char * argv[])
 		ErrorHandling("connect() error");
 	else
 		cout << "Connected.........." << endl;
+
+	std::future<void> recvThread(std::async(std::launch::async, receiving, hSocket));
 	
 	////////////////////////////////////////////////////////////////////////////////////////////
 	// Test code.
@@ -76,24 +78,24 @@ int main(int argc, char * argv[])
 		cout << "Call sending(..)" << endl;
 		sending(hSocket, pk);
 
-		// receiving packet
-		cout << "Waiting receiving.." << endl;
-		auto shRecvPk = receiving(hSocket);
+		//// receiving packet
+		//cout << "Waiting receiving.." << endl;
+		//auto shRecvPk = receiving(hSocket);
 
-		// print packet content
-		cout << shRecvPk->get_buf().str() << endl;
-		
-		// special process
-		// check packet type
-		if (shRecvPk->id != PTYPE::PT_SC_LOGIN_ACCEPT)
-		{
-			cout << "Login failed." << endl;
-			exit(1);
-		}
-		// casting packet type
-		auto shPk = std::dynamic_pointer_cast<PK_SC_LOGIN_ACCEPT>(shRecvPk);
-		
-		utk = shPk->userTk;
+		//// print packet content
+		//cout << shRecvPk->get_buf().str() << endl;
+		//
+		//// special process
+		//// check packet type
+		//if (shRecvPk->id != PTYPE::PT_SC_LOGIN_ACCEPT)
+		//{
+		//	cout << "Login failed." << endl;
+		//	exit(1);
+		//}
+		//// casting packet type
+		//auto shPk = std::dynamic_pointer_cast<PK_SC_LOGIN_ACCEPT>(shRecvPk);
+		//
+		//utk = shPk->userTk;
 	}
 
 	// PK_CS_LOBBY_LOAD_ROOMLIST
@@ -114,13 +116,13 @@ int main(int argc, char * argv[])
 		cout << "Call sending(..)" << endl;
 		sending(hSocket, pk);
 
-		// receiving packet
-		auto shRecvPk = receiving(hSocket);
+		//// receiving packet
+		//auto shRecvPk = receiving(hSocket);
 
-		// print packet content
-		cout << shRecvPk->get_buf().str() << endl;
+		//// print packet content
+		//cout << shRecvPk->get_buf().str() << endl;
 
-		// special process
+		//// special process
 
 		// 검토 사항	//rev
 		// 1. 리스트가 없는 경우?
@@ -169,6 +171,8 @@ int main(int argc, char * argv[])
 	recvThread.get();
 	*/
 
+	recvThread.get();
+
 	//// close socket
 	closesocket(hSocket);
 
@@ -194,48 +198,94 @@ void sending(SOCKET sock, std::shared_ptr<Packet_Base> shPk)
 	memset(buf, 0, pkSz);
 	memcpy_s(buf, pkSz, shPk->get_buf().str().c_str(), pkSz);
 
-	Sleep(200);
 	cout << "Sending packet.." << endl;
 	send(sock, buf, pkSz, 0);
 
 	delete[] buf;
 }
-
-std::shared_ptr<Packet_Base> receiving(SOCKET sock)
+void receiving(SOCKET sock)
 {
-	int transmitted, toReceive;
-	size_t bufLen;
-	char * buf;
+	while (1) {
+		cout << "Waiting receiving.." << endl;
 
-	// receive packet size(Packet's internal buffer length)
-	toReceive = sizeof(size_t);
-	while (1)
-	{
-		transmitted = recv(sock, (char *)&bufLen, toReceive, 0);
-		toReceive -= transmitted;
-		if (toReceive <= 0 || transmitted == 0)
+		int transmitted, toReceive;
+		size_t bufLen;
+		char * buf;
+
+		// receive packet size(Packet's internal buffer length)
+		toReceive = sizeof(size_t);
+		while (1)
+		{
+			transmitted = recv(sock, (char *)&bufLen, toReceive, 0);
+			toReceive -= transmitted;
+			if (toReceive <= 0 || transmitted == 0)
+				break;
+		}
+		if (transmitted == 0) {
+			cout << "Connection closed." << endl;
 			break;
-	}
-	if (transmitted == 0) {
-		cout << "Connection closed." << endl;
-	}
+		}
 
-	// receive packet(internal buffer)
-	toReceive = bufLen;
-	buf = new char[bufLen];
-	while (1)
-	{
-		transmitted = recv(sock, buf, toReceive, 0);
-		toReceive -= transmitted;
-		if (toReceive <= 0 || transmitted == 0)
+		// receive packet(internal buffer)
+		toReceive = bufLen;
+		buf = new char[bufLen];
+		while (1)
+		{
+			transmitted = recv(sock, buf, toReceive, 0);
+			toReceive -= transmitted;
+			if (toReceive <= 0 || transmitted == 0)
+				break;
+		}
+		if (transmitted == 0) {
+			cout << "Connection closed." << endl;
 			break;
-	}
-	if (transmitted == 0) {
-		cout << "Connection closed." << endl;
+		}
+
+		auto shPk = extractSCPacket(buf, bufLen);
+
+		cout << shPk->get_buf().str() << endl;
 	}
 
-	auto shPk = extractSCPacket(buf, bufLen);
-
-	return shPk;
+	return;
 }
-
+//
+//void receiving(SOCKET sock)
+//{
+//	int transmitted, toReceive;
+//	size_t bufLen;
+//	char * buf;
+//
+//	// receive packet size(Packet's internal buffer length)
+//	toReceive = sizeof(size_t);
+//	while (1)
+//	{
+//		transmitted = recv(sock, (char *)&bufLen, toReceive, 0);
+//		toReceive -= transmitted;
+//		if (toReceive <= 0 || transmitted == 0)
+//			break;
+//	}
+//	if (transmitted == 0) {
+//		cout << "Connection closed." << endl;
+//	}
+//
+//	// receive packet(internal buffer)
+//	toReceive = bufLen;
+//	buf = new char[bufLen];
+//	while (1)
+//	{
+//		transmitted = recv(sock, buf, toReceive, 0);
+//		toReceive -= transmitted;
+//		if (toReceive <= 0 || transmitted == 0)
+//			break;
+//	}
+//	if (transmitted == 0) {
+//		cout << "Connection closed." << endl;
+//	}
+//
+//	auto shPk = extractSCPacket(buf, bufLen);
+//
+//	cout << shPk->get_buf().str() << endl;
+//
+//	return;
+//}
+//
