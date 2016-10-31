@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\chatters\chatters\header_common.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\chatters\chatters\packet.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -27,10 +24,13 @@
     <ClCompile Include="..\..\chatters\chatters\PT_SC_Data.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\chatters\chatters\header_server.cpp">
+    <ClCompile Include="chatter_clnt.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="chatter_clnt.cpp">
+    <ClCompile Include="..\..\chatters\chatters\header_common.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\chatters\chatters\header_server.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="..\..\chatters\chatters\DBConnector.cpp">
@@ -38,9 +38,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\chatters\chatters\header_common.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\chatters\chatters\packet.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -51,6 +48,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="..\..\chatters\chatters\PTYPE.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\chatters\chatters\header_common.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="..\..\chatters\chatters\header_server.h">

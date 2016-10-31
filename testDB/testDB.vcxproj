@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{66BAD138-2DB8-49D1-899B-81DEC9659EFF}</ProjectGuid>
+    <ProjectGuid>{03BF662F-3C8F-46DD-B25B-4929A558F6A8}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>chatters_testclnt</RootNamespace>
+    <RootNamespace>testDB</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -93,7 +93,6 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -108,7 +107,6 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -149,21 +147,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\chatters\chatters\DBConnector.cpp" />
-    <ClCompile Include="..\..\chatters\chatters\header_common.cpp" />
-    <ClCompile Include="..\..\chatters\chatters\header_server.cpp" />
-    <ClCompile Include="..\..\chatters\chatters\packet.cpp" />
-    <ClCompile Include="..\..\chatters\chatters\PT_CS_Data.cpp" />
-    <ClCompile Include="..\..\chatters\chatters\PT_SC_Data.cpp" />
-    <ClCompile Include="chatter_clnt.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\chatters\chatters\DBConnector.h" />
-    <ClInclude Include="..\..\chatters\chatters\header_common.h" />
-    <ClInclude Include="..\..\chatters\chatters\header_server.h" />
-    <ClInclude Include="..\..\chatters\chatters\packet.h" />
-    <ClInclude Include="..\..\chatters\chatters\PTYPE.h" />
-    <ClInclude Include="..\..\chatters\chatters\PT_CS_Data.h" />
-    <ClInclude Include="..\..\chatters\chatters\PT_SC_Data.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
